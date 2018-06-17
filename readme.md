@@ -4,15 +4,63 @@ In this workshop we are going to build an application to check the IMDB movie da
 Run `ionic start movies blank`. This will generate the project called 'movies' using the Ionic 'blank' template.
 Navigate to the movies project folder using `cd movies` and check the result in the browser (`ionic serve --lab`).
 
-# 1. Editing the home page
-Welcome
+# 1. Create navigation menu
+## 1.1 Generate pages
+Our app will have two main pages.
 
-# 2. Add search page
-Using the Ionic CLI it's easy to generate a page for your app.
+1. *Search*: search the OMDB movie database
+2. *Featured*: list two featured movies
 
-Run `ionic generate page search`. `generate` can be alliased with `g`.
+We also need a `tabs` page to host the navigation menu. Using the Ionic CLI it's easy to generate a page for your app.
 
-Run `<ion-searchbar (ionInput)="getItems($event)"></ion-searchbar>`
+Run `ionic generate page tabs`. Also run the same command for the `search` and `featured` page. The `generate` command can be alliased with `g`.
+
+## 1.2. Create tab menu
+We don't need the home page anymore, so delete the `./src/pages/home` folder. The `tabs` page will be the main view. 
+
+In `./src/app/app.module.ts` you'll have to replace `HomePage` with `TabsPage` in the declarations and entryComponents NgModule array.
+In `./src/app/app.component.ts` set the rootPage property to `TabsPage`.
+
+Open `./src/pages/tabs/tabs.html` and update the view to include the navigation bar.
+```html
+<ion-tabs>
+  <ion-tab [root]="tab1Root" tabTitle="Search" tabIcon="search"></ion-tab>
+  <ion-tab [root]="tab2Root" tabTitle="Featured" tabIcon="heart"></ion-tab>
+</ion-tabs>
+```
+To view a list of all posible icons have a look at [IonIcons](https://ionicframework.com/docs/ionicons/)
+
+Open `./src/pages/tabs/tabs.ts` and add the references to the pages to the class.
+```typescript
+  tab1Root: string = 'SearchPage';
+  tab2Root: string = 'FeaturedPage';
+```
+
+Notice the reference to the page being a string. There will be no need to import the pages as we are going to use IonicPage for navigation. This has two advantages: it allows for deeplinking in the app including passing data via the uri to the view, and it supports lazyloading pages out of the box. We'll have to decorate the featured and search page module to mark the module as an Ionic page.
+
+Open `./src/pages/featured/featured.ts` and add the IonicPage decorator like so:
+
+```typescript
+import { NgModule } from '@angular/core';
+import { IonicPageModule, IonicPage } from 'ionic-angular';
+import { FeaturedPage } from './featured';
+
+@IonicPage()
+@NgModule({
+  declarations: [
+    FeaturedPage,
+  ],
+  imports: [
+    IonicPageModule.forChild(FeaturedPage),
+  ],
+})
+export class FeaturedPageModule {}
+```
+
+Do the same for `./src/pages/search/search.ts`.
+
+# 3. Add search page
+Add `<ion-searchbar (ionInput)="getItems($event)"></ion-searchbar>` to the view.
 
 
 # iOS & Android
