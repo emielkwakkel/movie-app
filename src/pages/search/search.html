@@ -3,6 +3,16 @@
     <ion-title>Search</ion-title>
   </ion-navbar>
 </ion-header>
-<ion-content padding>
-  <ion-searchbar (ionInput)="searchMovies($event)"></ion-searchbar>
+<ion-content>
+  <ion-searchbar (ionInput)="searchMovies(title)" [(ngModel)]="title"></ion-searchbar>
+  <ion-list>
+    <ion-item *ngFor="let movie of movies">
+      <ion-thumbnail item-start>
+        <img [src]="movie.Poster">
+      </ion-thumbnail>
+      <h2>{{movie.Title}}</h2>
+      <p>Type: {{movie.Type}} - Year: {{movie.Year}}</p>
+      <!-- <button ion-button clear item-end>View</button> -->
+    </ion-item>
+  </ion-list>
 </ion-content>

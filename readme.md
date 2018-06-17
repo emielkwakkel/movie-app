@@ -28,7 +28,7 @@ Open `./src/pages/tabs/tabs.html` and update the view to include the navigation 
   <ion-tab [root]="tab2Root" tabTitle="Featured" tabIcon="heart"></ion-tab>
 </ion-tabs>
 ```
-To view a list of all posible icons have a look at [IonIcons](https://ionicframework.com/docs/ionicons/)
+To view a list of all posible icons have a look at [IonIcons](https://ionicframework.com/docs/ionicons/), more information on tabs can be found at the [docs](https://ionicframework.com/docs/components/#tabs-icon-text).
 
 Open `./src/pages/tabs/tabs.ts` and add the references to the pages to the class.
 ```typescript
@@ -59,9 +59,62 @@ export class FeaturedPageModule {}
 
 Do the same for `./src/pages/search/search.ts`.
 
-# 3. Add search page
-Add `<ion-searchbar (ionInput)="getItems($event)"></ion-searchbar>` to the view.
+# 2. Search and retrieve data from the API
+# 2.1. Create a movie provider (service)
+A provider (also known as service) is used to centralise logic for use in multiple components. Exactly something we need for handling calls to the OMDB api. We can use the Ionic CLI to generate a provider for us.
 
+Run `ionic generate provider movie` and open the generated `./src/providers/movie/movie.ts` file. Don't worry about adding the provider to the app module, this is already done by the CLI.
+As you can see `HttpClient` is injected by default in the generated provider, but you'll have to manually import `HttpClientModule` to the app module and add it to the `imports` array.
+
+The information will be based on IMDB data provided by a publicly available OMDB api. Documentation can be found at http://www.omdbapi.com. Create a [free api key here](http://www.omdbapi.com/apikey.aspx). During the workshop you will receive an api key which is also capable of retrieving poster images.
+
+Add a `getMovies` function to the `MovieProvider`.
+
+```typescript
+getMovies(title: string) {
+    return this.http.get(`http://www.omdbapi.com/?s=${encodeURI(title)}&apikey=6c3a2d45`)
+}
+```
+
+## 2.2 Update the search component
+Open `./src/pages/search/search.html` and update the view.
+
+Remove the `padding` attribute from the `ion-content` element to have the searchbar fill the entire width of the screen.
+
+To add the searchbar and list of found movies update `ion-content` as follows:
+```html
+<ion-content>
+  <ion-searchbar (ionInput)="searchMovies(title)" [(ngModel)]="title"></ion-searchbar>
+  <ion-list>
+    <ion-item *ngFor="let movie of movies">
+      <ion-thumbnail item-start>
+        <img [src]="movie.Poster">
+      </ion-thumbnail>
+      <h2>{{movie.Title}}</h2>
+      <p>Type: {{movie.Type}} - Year: {{movie.Year}}</p>
+    </ion-item>
+  </ion-list>
+</ion-content>
+```
+Documentation of [Ionic Searchbar](https://ionicframework.com/docs/components/#searchbar) and [Ionic List](https://ionicframework.com/docs/components/#lists).
+
+Open `./src/pages/search/search.ts` and add the searchMovies function. Make sure to import the `MovieProvider` and inject it into the constructor for dependency injection.
+
+```typescript
+  searchMovies(title: string) {
+    this.movie.getMovies(title).subscribe(
+      (movies: any) => {
+        this.movies = movies.Search
+      },
+      error => {
+        console.error('error', error);
+        this.error = error
+      });
+  }
+```
+
+## 2.3 Make it fancy!
+There are several improvements waiting for you to implement. Use the Ionic documentation and above examples to work these out! Start with implementing an [Ionic loading spinner](https://ionicframework.com/docs/components/#loading) and handling errors using [Ionic toast](https://ionicframework.com/docs/components/#toast).
 
 # iOS & Android
 We'll have to use the Cordova CLI, wrapped by the Ionic CLI (`ionic cordova ...`) to add the iOS (if on MacOS) and Android platforms to the project.
@@ -69,7 +122,7 @@ We'll have to use the Cordova CLI, wrapped by the Ionic CLI (`ionic cordova ...`
 Before we get to it we'll have to name our app in the main config file (`./config.xml`). On line 2 rename the widget element id propery from `io.ionic.starter` to an unique identifier. On line 3 rename the name property to `MoviesApp`.
 
 ## iOS (MacOS only)
-Make sure to have Xcode installed. You can download it from here: https://developer.apple.com/xcode/
+Make sure to have Xcode installed. You can download it from [here](https://developer.apple.com/xcode/)
 
 Run `ionic cordova platform add ios`. 
 
@@ -82,7 +135,7 @@ This will build the project and wrap it in the cordova shell.
 Open `MoviesApp.xcodeproj` with Xcode. In the main top bar select an iPhone model emulator, or a connected iOS device. By pressing the play button the project will be run on the selected (emulated) device. In the left toolbar click on the root element `MoviesApp project`, in the `General` tab.  In the signing you'll be able to use your Apple Developers ID to sign the app.
 
 ## Android
-Make sure to have Android Studio installed. You can download it from here: https://developer.android.com/studio/
+Make sure to have Android Studio installed. You can download it from [here](https://developer.android.com/studio/)
 
 Run `ionic cordova platform add android`. The platforms/android folder will be generated, just like the iOS platform folder.
 Run `ionic cordova build android` to build the Android project. 

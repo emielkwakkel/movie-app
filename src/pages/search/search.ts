@@ -1,12 +1,6 @@
 import { Component } from '@angular/core';
 import { IonicPage, NavController, NavParams } from 'ionic-angular';
-
-/**
- * Generated class for the SearchPage page.
- *
- * See https://ionicframework.com/docs/components/#navigation for more info on
- * Ionic pages and navigation.
- */
+import { MovieProvider } from '../../providers/movie/movie';
 
 @IonicPage()
 @Component({
@@ -14,16 +8,20 @@ import { IonicPage, NavController, NavParams } from 'ionic-angular';
   templateUrl: 'search.html',
 })
 export class SearchPage {
-
-  constructor(public navCtrl: NavController, public navParams: NavParams) {
+  public title: string;
+  public movies: any;
+  public error: any;
+  constructor(public navCtrl: NavController, public navParams: NavParams, public movie: MovieProvider) {
   }
 
-  ionViewDidLoad() {
-    console.log('ionViewDidLoad SearchPage');
+  searchMovies(title: string) {
+    this.movie.getMovies(title).subscribe(
+      (movies: any) => {
+        this.movies = movies.Search
+      },
+      error => {
+        console.error('error', error);
+        this.error = error
+      });
   }
-
-  searchMovies(event) {
-    console.log('event', event);
-  }
-
 }
