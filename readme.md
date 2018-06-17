@@ -60,7 +60,7 @@ export class FeaturedPageModule {}
 Do the same for `./src/pages/search/search.ts`.
 
 # 2. Search and retrieve data from the API
-# 2.1. Create a movie provider (service)
+## 2.1. Create a movie provider (service)
 A provider (also known as service) is used to centralise logic for use in multiple components. Exactly something we need for handling calls to the OMDB api. We can use the Ionic CLI to generate a provider for us.
 
 Run `ionic generate provider movie` and open the generated `./src/providers/movie/movie.ts` file. Don't worry about adding the provider to the app module, this is already done by the CLI.
@@ -72,7 +72,7 @@ Add a `getMovies` function to the `MovieProvider`.
 
 ```typescript
 getMovies(title: string) {
-    return this.http.get(`http://www.omdbapi.com/?s=${encodeURI(title)}&apikey=6c3a2d45`)
+    return this.http.get(`http://www.omdbapi.com/?s=${encodeURI(title)}&apikey=[key]`)
 }
 ```
 
