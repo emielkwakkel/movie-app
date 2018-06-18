@@ -14,9 +14,16 @@ export class SearchPage {
   constructor(public navCtrl: NavController, public navParams: NavParams, public movie: MovieProvider) {
   }
 
+  pushPage(id: string) {
+    this.navCtrl.push('detail-page', {
+      'id': id
+    })
+  }
+
   searchMovies(title: string) {
     this.movie.getMovies(title).subscribe(
       (movies: any) => {
+        console.log(movies.Search);
         this.movies = movies.Search
       },
       error => {

@@ -4,9 +4,10 @@ In this workshop we are going to build an application to check the IMDB movie da
 Run `ionic start movies blank`. This will generate the project called 'movies' using the Ionic 'blank' template.
 Navigate to the movies project folder using `cd movies` and check the result in the browser (`ionic serve --lab`).
 
+
 # 1. Create navigation menu
 ## 1.1 Generate pages
-Our app will have two main pages.
+Our app will have two main pages and a *movie detail* page.
 
 1. *Search*: search the OMDB movie database
 2. *Featured*: list two featured movies
@@ -68,11 +69,15 @@ As you can see `HttpClient` is injected by default in the generated provider, bu
 
 The information will be based on IMDB data provided by a publicly available OMDB api. Documentation can be found at http://www.omdbapi.com. Create a [free api key here](http://www.omdbapi.com/apikey.aspx). During the workshop you will receive an api key which is also capable of retrieving poster images.
 
-Add a `getMovies` function to the `MovieProvider`.
+Add a `getMovies` function to the `MovieProvider`. For the detail page that we are going to build we'll need a `getMovie` function, which loads a single movie based on an ID. Add this function to the `MovieProvider` as well.
 
 ```typescript
 getMovies(title: string) {
     return this.http.get(`http://www.omdbapi.com/?s=${encodeURI(title)}&apikey=[key]`)
+}
+
+getMovie(imdbID: string) {
+  return this.http.get(`http://www.omdbapi.com/?i=${imdbID}&apikey=[key]`)
 }
 ```
 
@@ -116,6 +121,143 @@ Open `./src/pages/search/search.ts` and add the searchMovies function. Make sure
 ## 2.3 Make it fancy!
 There are several improvements waiting for you to implement. Use the Ionic documentation and above examples to work these out! Start with implementing an [Ionic loading spinner](https://ionicframework.com/docs/components/#loading) and handling errors using [Ionic toast](https://ionicframework.com/docs/components/#toast).
 
+# 3 Detail page
+## 3.1 Link to detail page
+Start by generating a page called `detail` using the Ionic CLI.
+
+Open `./src/pages/search/search.ts` and add a function to navigate to the detail page.
+
+```typescript
+pushPage(id: string) {
+  this.navCtrl.push('detail-page', {
+    'id': id
+  })
+}
+```
+
+In the `search.html` view make sure to handle the click event on the `ion-item` element.
+
+```html
+<ion-item *ngFor="let movie of movies" (click)="pushPage(movie.imdbID)">
+  ...
+</ion-item>
+```
+
+## 3.2 Setup detail page
+Open `./src/pages/detail/detail.ts`. The detail page will receive an id of the IMDB movie to display data of using the uri. To setup IonicPage to receive an ID we'll have to pass an object to the `IonicPage` decorator.
+
+```javascript
+@IonicPage({
+  name: 'detail-page',
+  segment: 'detail/:id'
+})
+```
+
+Within the `DetailPage` class add an `imdbId` property and get the id using navParams.
+
+```typescript
+private imdbID: string = this.navParams.data.id;
+```
+
+The moment the page is loaded we'll have to use this ID to get the movie using `MovieProvider.getMovie(id)`.
+
+```typescript
+ionViewDidLoad() {
+  // Return undefined if page is loaded without supplying an ID
+  if (!this.imdbID) return;
+
+  this.movieService.getMovie(this.imdbID).subscribe(
+    (data: any) => {
+      this.movie = data;
+    },
+    (error) => {
+      console.error('error', error);
+      this.error = error;
+    }
+  )
+}
+```
+
+Make sure to add the `movie` and `error` property in the class. To focus on Ionic functionality during this workshop you can type them as `any`, but adding an interface will be a bonus!
+
+We are going to use an [Ionic Card](https://ionicframework.com/docs/components/#cards) to display data of a movie. This movie card can be reused on the `featured` page where we highlight two movies. In order to share this view across pages we are going to create a `movie-card` component.
+
+Run `ionic generate component movie-card` to generate the component. You'll find it in the `./src/components/movie-card` folder.
+
+Open `./src/components/movie-card/movie-card.ts` and add an Input decorator to get specific Movie details.
+```typescript
+export class MovieCardComponent {
+  @Input() movie: any;
+}
+```
+
+Open `./src/components/movie-card/movie-card.html` and update the view as follows:
+```html
+<ion-card *ngIf="movie">
+  <ion-item>
+    <ion-avatar item-start>
+      <ion-icon name="film" large></ion-icon>
+    </ion-avatar>
+    <h2>{{movie.Title}}</h2>
+    <p>
+      Genre: {{movie.Genre}}
+      <br> Released: {{movie.Released}}
+      <br> Runtime: {{movie.Runtime}}
+    </p>
+  </ion-item>
+
+  <img [src]="movie.Poster">
+
+  <ion-card-content>
+    <p>{{movie.Plot}}</p>
+  </ion-card-content>
+
+  <ion-row>
+    <ion-col>
+      <button ion-button icon-start clear small>
+        <ion-icon name="thumbs-up"></ion-icon>
+        <div>{{movie.imdbRating}} rating</div>
+      </button>
+    </ion-col>
+    <ion-col>
+      <button ion-button icon-start clear small>
+        <ion-icon name="text"></ion-icon>
+        <div>{{movie.imdbVotes}} votes</div>
+      </button>
+    </ion-col>
+    <ion-col center text-center>
+      <ion-note>
+        {{movie.Runtime}} runtime
+      </ion-note>
+    </ion-col>
+  </ion-row>
+</ion-card>
+```
+This will display all needed movie data if present.
+
+Open `./src/components/movie-card/movie-card.scss` and update the style to make the avatar icon bigger:
+```css
+movie-card {
+    ion-avatar ion-icon {
+        font-size: 50px;
+    }
+}
+```
+
+You are almost ready to use the `movie-card` component in the `details` page. We'll have to `import { IonicModule } from 'ionic-angular';` and supply `IonicModule` to the `imports` array of `./src/components/components.module.ts`. This will make sure all the Ionic goodieness will be available.
+
+The `movie-card` component is ready for use. All we have to do now is import the `ComponentsModule` in the `DetailsModule` and add the component to the detail view.
+
+```typescript
+import { ComponentsModule } from '../../components/components.module';
+```
+
+Open `./src/pages/detail/detail.html` and add the movie card component in the `ion-content` element.
+
+```html
+<movie-card [movie]="movie"></movie-card>
+```
+
 # iOS & Android
 We'll have to use the Cordova CLI, wrapped by the Ionic CLI (`ionic cordova ...`) to add the iOS (if on MacOS) and Android platforms to the project.
 
@@ -152,3 +294,11 @@ Add `--target "[target]"` to specify a specific target device to emulate on. To 
 Example: `ionic cordova emulate ios --livereload --target "iPhone-X, 11.4"`
 
 Full documentation on emulate can be found here: https://ionicframework.com/docs/cli/cordova/emulate/
+
+# Troubleshooting
+## Node-sass errors
+Run `npm rebuild node-sass --force` If you run into errors like these:
+```
+Error: Missing binding /movies/node_modules/node-sass/vendor/darwin-x64-48/binding.node
+Node Sass could not find a binding for your current environment: OS X 64-bit with Node.js 6.x
+```

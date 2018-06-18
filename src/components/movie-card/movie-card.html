@@ -1,0 +1,39 @@
+<ion-card *ngIf="movie">
+  <ion-item>
+    <ion-avatar item-start>
+      <ion-icon name="film" large></ion-icon>
+    </ion-avatar>
+    <h2>{{movie.Title}}</h2>
+    <p>
+      Genre: {{movie.Genre}}
+      <br> Released: {{movie.Released}}
+      <br> Runtime: {{movie.Runtime}}
+    </p>
+  </ion-item>
+
+  <img [src]="movie.Poster">
+
+  <ion-card-content>
+    <p>{{movie.Plot}}</p>
+  </ion-card-content>
+
+  <ion-row>
+    <ion-col>
+      <button ion-button icon-start clear small>
+        <ion-icon name="thumbs-up"></ion-icon>
+        <div>{{movie.imdbRating}} rating</div>
+      </button>
+    </ion-col>
+    <ion-col>
+      <button ion-button icon-start clear small>
+        <ion-icon name="text"></ion-icon>
+        <div>{{movie.imdbVotes}} votes</div>
+      </button>
+    </ion-col>
+    <ion-col center text-center>
+      <ion-note>
+        {{movie.Runtime}} runtime
+      </ion-note>
+    </ion-col>
+  </ion-row>
+</ion-card>
