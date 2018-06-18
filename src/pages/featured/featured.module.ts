@@ -1,6 +1,7 @@
 import { NgModule } from '@angular/core';
 import { IonicPageModule, IonicPage } from 'ionic-angular';
 import { FeaturedPage } from './featured';
+import { ComponentsModule } from '../../components/components.module';
 
 @IonicPage()
 @NgModule({
@@ -9,6 +10,7 @@ import { FeaturedPage } from './featured';
   ],
   imports: [
     IonicPageModule.forChild(FeaturedPage),
+    ComponentsModule,
   ],
 })
 export class FeaturedPageModule {}
