@@ -5,7 +5,7 @@ Run `ionic start movies blank`. This will generate the project called 'movies' u
 Navigate to the movies project folder using `cd movies` and check the result in the browser (`ionic serve --lab`).
 
 
-# 1. Create navigation menu
+# 1. Create navigation menu (manually)
 ## 1.1 Generate pages
 Our app will have two main pages and a *movie detail* page.
 
@@ -257,6 +257,10 @@ Open `./src/pages/detail/detail.html` and add the movie card component in the `i
 ```html
 <movie-card [movie]="movie"></movie-card>
 ```
+
+Using same logics you'll be able to highlight two featured movies and display them using the `movie-card` component.
+
+Congrats! You created your first Ionic app!
 
 # iOS & Android
 We'll have to use the Cordova CLI, wrapped by the Ionic CLI (`ionic cordova ...`) to add the iOS (if on MacOS) and Android platforms to the project.
